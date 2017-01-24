@@ -17,7 +17,7 @@ var upPressed = false;
 var downPressed = false;
 var enterPressed = false;
 //lets store all images under one variable to help minimize our code.
-var image = new function(){
+var images = new function(){
  this.player = new Image();
     this.player.src = "../img/Ship.png";
 this.bulletImg = new Image();
@@ -48,7 +48,7 @@ function render()
 {
     surface.clearRect(0, 0, _canvas.width, _canvas.height);
 
-    surface.drawImage(image.player,player.x,player.y);
+    surface.drawImage(images.player,player.x,player.y);
 
     for(var i = 0; i<bulletArray.length; i++) {
         surface.drawImage(bulletArray[i].img, bulletArray[i].x, bulletArray[i].y);
@@ -121,7 +121,7 @@ function fireBullet(){
     var bullet = {};
     bullet.x = player.x;
     bullet.y = player.y;
-    bullet.img = image.bulletImg;
+    bullet.img = images.bulletImg;
     bulletArray.push(bullet);
 }
 
