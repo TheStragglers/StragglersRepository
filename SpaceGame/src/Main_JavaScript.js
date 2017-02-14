@@ -41,7 +41,7 @@ powerBar.img.src = "../img/powerBar.png";
 
 var asteroidArray =  [];//new
 
-var enemyArray = [];//new
+
 
 var asteroidArray = []; //asteroid array
 console.log()
@@ -67,6 +67,9 @@ var flameArray = [];
 
 var bulletImg = new Image();
 bulletImg.src = "../img/Bullet.png";
+
+var enemyBulletImg = new Image();
+enemyBulletImg.src = "../img/Bullet.png";
 
 var flameBulletImg = new Image();
 flameBulletImg.src = "../img/hpBar.png";
@@ -96,7 +99,7 @@ powerUpgrade.img.src = "../img/powerUpgrade.png";
 var fireRateUpgrade = {x:null, y:null,img:new Image,on:false};
 fireRateUpgrade.img.src = "../img/fireRateUpgrade.png";
 
-
+var enemyBulletArray = []; // new enemy Bullet array
 
 //var powerUpArray = [];//Later add the powerUps in this array for collision
 
@@ -125,6 +128,7 @@ interval = setInterval(startScreen, 33.34);
 
 var seconds = 0;
 var frPreSec = 0;
+var score = 0;
 
 //---------------
 
@@ -166,14 +170,24 @@ function update()//Main Game Loop!
     playerStats();
 	moveAsteroid();
 	moveEnemy();
+	points(score);
+	moveEnemyBullets();
 
 }
+function points(score){						// Keeps Count of Points 
+	surface.fillStyle = "white";
+	surface.font = "30px Arial";
+	surface.fillText("SCORE : ",1500/2,25)
+	surface.fillText (score, 1800/2,25); 
+}
+
 function timer(count){
     surface.fillStyle = "white";
     surface.font = "30px Arial";
     surface.fillText(count,1200/2,25);
 	
 }
+
 
 function playerStats(){
     surface.fillStyle = "white";
@@ -201,7 +215,7 @@ function render()
 	for(var e = 0; e < enemyArray.length; e++ ) {
 		surface.drawImage(enemyArray[e].img, enemyArray[e].x, enemyArray[e].y);
 	}
-
+enemyBulletRender();
 }
 
 function onKeyDown(event)
@@ -346,25 +360,43 @@ function checkCollision() {
 			clearInterval(interval);
 		}
 	}
-	
+	*/
      //laser collision with enemies
     for (var l = 0; l < bulletArray.length; l++) {
-        for (var m = 0; m < powerUpArray.length; m++){
+        for (var m = 0; m < asteroidArray.length; m++){
 
-            if (!( bulletArray[l].y+10 > powerUpArray[m].y + 100 
-			|| bulletArray[l].y + 64 < powerUpArray[m].y + 30
-            || bulletArray[l].x > powerUpArray[m].x + 64 
-			|| bulletArray[l].x + 64 < powerUpArray[m].x + 14 ))
+            if (!( bulletArray[l].y+10 >asteroidArray[m].y + 100 // p.top > a.bottom
+			|| bulletArray[l].y + 64 < asteroidArray[m].y + 30  // p.bottom < a.top
+            || bulletArray[l].x > asteroidArray[m].x + 64 // p.left > a.right
+			|| bulletArray[l].x + 64 < asteroidArray[m].x + 14 ))// p.right < a.left
 			{
 
                 bulletArray.splice(l,1);
-                //powerUpArray[m].on = true;
+				asteroidArray.splice(m,1);
+				score++;
+                break;
+
+            }
+        }
+    }
+for (var l = 0; l < bulletArray.length; l++) {
+        for (var m = 0; m < enemyArray.length; m++){
+
+            if (!( bulletArray[l].y+10 >enemyArray[m].y + 100 
+			|| bulletArray[l].y + 64 < enemyArray[m].y + 30
+            || bulletArray[l].x > enemyArray[m].x + 64 
+			|| bulletArray[l].x + 64 < enemyArray[m].x + 14 ))
+			{
+
+                bulletArray.splice(l,1);
+				enemyArray.splice(m,1);
+				score = score +10;
+                break;
 
             }
         }
     }
 
-*/
 
 
 	for (var i = 0; i < asteroidArray.length; i++)
@@ -378,7 +410,21 @@ function checkCollision() {
 			clearInterval(interval);
 		}
 	}
+	
+	for (var i = 0; i < enemyBulletArray.length; i++)
+	{
+		if (!(player.x+30 > enemyBulletArray[i].x|| // p.left > a.right
+			  player.x+SIZE-30 < enemyBulletArray[i].x+64 || // p.right < a.left
+			  player.y+30 > enemyBulletArray[i].y+10 || // p.top > a.bottom
+			  player.y+SIZE-30 < enemyBulletArray[i].y+64))  // p.bottom < a.top
+		{
+		
+			clearInterval(interval);
+		}
+	}
 }
+
+ 
 //------------------------------------------------------- player functions 
 function movePlayer()
 {
@@ -590,7 +636,7 @@ for(var i = 0; i<flameArray.length;i++){
  
   
 }
-
+//------------------------------------------- Hazzards---------------------------------------------
 function spawnAsteroid(){
 	var randNum = Math.floor(Math.random()*570);
 	
@@ -605,12 +651,29 @@ function spawnEnemy(){
 	var randNum = Math.floor(Math.random()*570);
 	
 	var enemy = {};
+	
+	 var enemyLifespan = 0;
 	enemy.x = 1464;
 	enemy.y = randNum;
 	enemy.img = enemyImg;
 	enemyArray.push(enemy);
-}
+	enemyLifespan++;
+	
 
+	fireEnemyBullet();
+
+}
+function fireEnemyBullet(){
+	for (var a = 0; a < enemyArray.length; a++){
+	 var enemyBullet = {};
+	  enemyBullet.x = enemyArray[a].x;
+    enemyBullet.y = enemyArray[a].y;
+	
+    enemyBullet.img = bulletImg;
+    enemyBulletArray.push(enemyBullet);
+	
+	}
+ }
 function moveAsteroid(){
 	for (var a =0; a<asteroidArray.length; a++){
 		asteroidArray[a].x -= asteroidSpeed;
@@ -623,3 +686,21 @@ function moveEnemy(){
 		}
 	}
 
+	
+
+
+function moveEnemyBullets(){
+    for (var i = 0; i<enemyBulletArray.length; i++){
+        enemyBulletArray[i].x += -BULLETSPEED;
+        if(enemyBulletArray[i] > COLS*SIZE+10){
+            enemyBulletArray.splice(i,1);
+        }
+    }
+}
+
+function enemyBulletRender(){
+	for(var i = 0; i<enemyBulletArray.length; i++) {
+        surface.drawImage(enemyBulletArray[i].img, enemyBulletArray[i].x, enemyBulletArray[i].y);
+    }
+   
+}
